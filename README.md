@@ -5,4 +5,4 @@
 
 ![ProgressBar 50%](image-1.png)
 ---
-![ProgressBar 100%](image-2.png)
+![ProgressBar 100%](image-3.png)
