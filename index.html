@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard Race</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .axis text {
+            font-size: 14px;
+        }
+        .axis path, .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+    </style>
+</head>
+<body>
+    <svg width="500" height="300"></svg>
+    <style>
+        #container {
+          margin: 20px;
+          width: 200px;
+          height: 200px;
+          position: relative;
+        }
+        
+      </style>
+      <div class="home" style="border: 2px red solid; padding: 10px;">
+        <input id="percentage" type="number" value="50" max="100" />
+        <button onclick="submit()">Start</button>
+        <div id="container"></div>
+      </div>
+      <div id="leaderboard"></div>
+  
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/progressbar.js/1.1.0/progressbar.min.js"></script>
+      <script defer src="script.js"></script>
+      <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script>
+        const teams = [
+            { name: "Team A", score: 4 },
+            { name: "Team B", score: 0 },
+            { name: "Team C", score: 10 }
+        ];
+
+        const width = 500;
+        const height = 300;
+        const margin = { top: 20, right: 30, bottom: 40, left: 100 };
+
+        const svg = d3.select("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const xScale = d3.scaleLinear()
+            .domain([0, 100]) // Adjust max score as needed
+            .range([margin.left, width - margin.right]);
+
+        const yScale = d3.scaleBand()
+            .domain(teams.map(d => d.name))
+            .range([margin.top, height - margin.bottom])
+            .padding(0.2);
+
+        const xAxis = d3.axisBottom(xScale);
+        const yAxis = d3.axisLeft(yScale);
+
+        svg.append("g")
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .call(xAxis)
+            .attr("class", "axis");
+
+        svg.append("g")
+            .attr("transform", `translate(${margin.left},0)`)
+            .call(yAxis)
+            .attr("class", "axis");
+
+        function updateLeaderboard() {
+            const bars = svg.selectAll(".bar")
+                .data(teams, d => d.name);
+
+            bars.enter()
+                .append("rect")
+                .attr("class", "bar")
+                .merge(bars)
+                .attr("x", margin.left)
+                .attr("y", d => yScale(d.name))
+                .attr("height", yScale.bandwidth())
+                .transition()
+                .duration(500)
+                .attr("width", d => xScale(d.score) - margin.left)
+                .attr("fill", "green");
+
+            bars.exit().remove();
+
+            const scores = svg.selectAll(".score")
+                .data(teams, d => d.name);
+
+            scores.enter()
+                .append("text")
+                .attr("class", "score")
+                .merge(scores)
+                .attr("x", d => xScale(d.score) + 5)
+                .attr("y", d => yScale(d.name) + yScale.bandwidth() / 2)
+                .attr("dy", "0.35em")
+                .text(d => d.score)
+                .style("font-size", "14px")
+                .style("font-weight", "bold");
+
+            scores.exit().remove();
+        }
+
+        // Simulate score updates
+        setInterval(() => {
+            let team = teams[Math.floor(Math.random() * teams.length)];
+            team.score = Math.min(team.score + Math.floor(Math.random() * 5), 100); // Max 100 points
+            updateLeaderboard();
+        }, 1000);
+
+        updateLeaderboard();
+    </script>
+</body>
+</html>
